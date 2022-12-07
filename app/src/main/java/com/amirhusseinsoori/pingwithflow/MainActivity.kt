@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
+import arrow.core.Either
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import java.io.IOException
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         lifecycleScope.launchWhenStarted {
-            isConnectedToInternet().collect { data ->
+            isNetworkConnected().collect { data ->
                 data.fold(onSuccess = {
                     when (it) {
                         true -> Log.e("result", " : isConnected ")
@@ -30,11 +31,21 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    private fun isConnectedToInternet(): Flow<Result<Boolean>> = flow {
+
+
+    fun isNetworkConnected(): Flow<Result<Boolean>> = flow {
         emit(Result.success(COMMAND.handlePing()))
     }.catch { ex ->
         emit(Result.failure(ex))
     }.flowOn(Dispatchers.IO)
+
+
+//    fun isNetworkConnected(): Flow<Either<Boolean, Throwable>> =
+//        flow<Either<Boolean, Throwable>> {
+//            emit(Either.Left(COMMAND.handlePing()))
+//        }.catch { ex ->
+//            emit(Either.Right(ex))
+//        }.flowOn(Dispatchers.IO)
 }
 
 
